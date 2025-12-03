@@ -1,4 +1,3 @@
-# Dockerfile
 FROM gradle:8.5-jdk21 AS builder
 
 WORKDIR /app
@@ -7,8 +6,8 @@ COPY . .
 # Compilar el JAR
 RUN ./gradlew shadowJar
 
-# Imagen final ligera
-FROM openjdk:21-slim
+# Imagen final ligera con Eclipse Temurin
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copiar el JAR compilado
