@@ -18,4 +18,16 @@ class UserRepository {
     }
 
     fun deleteByEmail(email: String): Boolean = users.removeIf { it.email == email }
+
+    /**
+     * Actualiza solo el campo isAdmin del usuario identificado por email.
+     * Devuelve el usuario actualizado o null si no existe.
+     */
+    fun updateAdminByEmail(email: String, isAdmin: Boolean): User? {
+        val idx = users.indexOfFirst { it.email == email }
+        if (idx == -1) return null
+        val updated = users[idx].copy(isAdmin = isAdmin)
+        users[idx] = updated
+        return updated
+    }
 }

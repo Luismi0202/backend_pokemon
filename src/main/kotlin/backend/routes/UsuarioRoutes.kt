@@ -8,8 +8,13 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import com.google.gson.annotations.SerializedName
 
 private val userRepo = UserRepository()
+
+data class AdminUpdate(
+    @SerializedName("is_admin") val isAdmin: Boolean
+)
 
 fun Route.usuarioRoutes() {
     route("/usuarios") {
@@ -40,6 +45,20 @@ fun Route.usuarioRoutes() {
                 call.respond(HttpStatusCode.Created, created)
             } catch (e: EmailAlreadyExistsException) {
                 call.respond(HttpStatusCode.Conflict, mapOf("error" to "email ya existe"))
+            }
+        }
+
+        // PATCH /usuarios/{email} -> actualizar solo is_admin
+        patch("{email}") {
+            val email = call.parameters["email"] ?: return@patch call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
+            val body = runCatching { call.receive<AdminUpdate>() }.getOrElse {
+                return@patch call.respond(HttpStatusCode.BadRequest, mapOf("error" to "body inválido"))
+            }
+            val updated = userRepo.updateAdminByEmail(email, body.isAdmin)
+            if (updated != null) {
+                call.respond(HttpStatusCode.OK, updated)
+            } else {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "usuario no encontrado"))
             }
         }
 
