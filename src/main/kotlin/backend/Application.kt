@@ -1,5 +1,5 @@
 
-package backend
+package com.backend
 
 import backend.routes.pokemonRoutes
 import backend.routes.usuarioRoutes

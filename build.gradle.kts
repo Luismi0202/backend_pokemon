@@ -30,6 +30,14 @@ tasks {
     shadowJar {
         archiveFileName.set("pokemon-backend-all.jar")
         mergeServiceFiles()
+        manifest {
+            attributes("Main-Class" to "com.example.backend.ApplicationKt")
+        }
+    }
+    jar {
+        manifest {
+            attributes("Main-Class" to "com.example.backend.ApplicationKt")
+        }
     }
 }
 
