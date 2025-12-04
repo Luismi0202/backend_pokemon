@@ -3,6 +3,9 @@ FROM gradle:8.5-jdk21 AS builder
 WORKDIR /app
 COPY . .
 
+# Dar permisos de ejecución a gradlew
+RUN chmod +x gradlew
+
 # Compilar el JAR
 RUN ./gradlew shadowJar
 
