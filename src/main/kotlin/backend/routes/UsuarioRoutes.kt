@@ -1,4 +1,3 @@
-
 package backend.routes
 
 import backend.models.User
@@ -14,6 +13,12 @@ private val userRepo = UserRepository()
 
 fun Route.usuarioRoutes() {
     route("/usuarios") {
+        // GET /usuarios  -> lista todos los usuarios
+        get {
+            val users = userRepo.getAll()
+            call.respond(users)
+        }
+
         // GET /usuarios/{email}
         get("{email}") {
             val email = call.parameters["email"] ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
@@ -35,6 +40,18 @@ fun Route.usuarioRoutes() {
                 call.respond(HttpStatusCode.Created, created)
             } catch (e: EmailAlreadyExistsException) {
                 call.respond(HttpStatusCode.Conflict, mapOf("error" to "email ya existe"))
+            }
+        }
+
+        // DELETE /usuarios/{email}
+        delete("{email}") {
+            val email = call.parameters["email"]
+                ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
+            val deleted = userRepo.deleteByEmail(email)
+            if (deleted) {
+                call.respond(HttpStatusCode.OK, mapOf("message" to "usuario eliminado"))
+            } else {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "usuario no encontrado"))
             }
         }
     }

@@ -1,27 +1,21 @@
 package backend.repo
 
 import backend.models.User
-import java.util.concurrent.atomic.AtomicInteger
 
 class UserRepository {
-    private val seq = AtomicInteger(1)
-    private val usersByEmail = mutableMapOf<String, User>()
+    private val users = mutableListOf<User>()
+    private var nextId = 1
+
+    fun getAll(): List<User> = users.toList()
+
+    fun getByEmail(email: String): User? = users.find { it.email == email }
 
     fun create(user: User): User {
-        if (usersByEmail.containsKey(user.email)) {
-            throw EmailAlreadyExistsException()
-        }
-        val created = user.copy(id = seq.getAndIncrement())
-        usersByEmail[user.email] = created
-        return created
+        if (users.any { it.email == user.email }) throw EmailAlreadyExistsException()
+        val newUser = user.copy(id = nextId++)
+        users.add(newUser)
+        return newUser
     }
 
-    fun getByEmail(email: String): User? = usersByEmail[email]
-
-    fun clear() {
-        usersByEmail.clear()
-        seq.set(1)
-    }
+    fun deleteByEmail(email: String): Boolean = users.removeIf { it.email == email }
 }
-
-class EmailAlreadyExistsException : RuntimeException("email exists")
