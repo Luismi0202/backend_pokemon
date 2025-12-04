@@ -22,8 +22,10 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm")
 }
 
+
+
 application {
-    mainClass.set("com.example.backend.ApplicationKt")
+    mainClass.set("com.backend.ApplicationKt")
 }
 
 tasks {
@@ -31,14 +33,15 @@ tasks {
         archiveFileName.set("pokemon-backend-all.jar")
         mergeServiceFiles()
         manifest {
-            attributes("Main-Class" to "com.example.backend.ApplicationKt")
+            attributes("Main-Class" to "com.backend.ApplicationKt")
         }
     }
     jar {
         manifest {
-            attributes("Main-Class" to "com.example.backend.ApplicationKt")
+            attributes("Main-Class" to "com.backend.ApplicationKt")
         }
     }
 }
+
 
 kotlin { jvmToolchain(17) }
