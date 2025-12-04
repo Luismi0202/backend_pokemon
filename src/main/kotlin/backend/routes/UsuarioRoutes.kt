@@ -9,6 +9,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import com.google.gson.annotations.SerializedName
+import kotlin.text.get
 
 private val userRepo = UserRepository()
 
@@ -26,7 +27,10 @@ fun Route.usuarioRoutes() {
 
         // GET /usuarios/{email}
         get("{email}") {
-            val email = call.parameters["email"] ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
+            val email = call.parameters["email"] ?: return@get call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to "email requerido")
+            )
             val user = userRepo.getByEmail(email)
             if (user == null) {
                 call.respond(HttpStatusCode.NotFound, mapOf("error" to "usuario no encontrado"))
@@ -49,15 +53,25 @@ fun Route.usuarioRoutes() {
         }
 
         // PATCH /usuarios/{email} -> actualizar solo is_admin
+
         patch("{email}") {
-            val email = call.parameters["email"] ?: return@patch call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
-            val body = runCatching { call.receive<AdminUpdate>() }.getOrElse {
+            val email = call.parameters["email"]
+                ?: return@patch call.respond(HttpStatusCode.BadRequest, mapOf("error" to "email requerido"))
+
+            val body = try {
+                call.receive<AdminUpdate>()
+            } catch (e: Exception) {
+                call.application.environment.log.error("PATCH /usuarios/$email -> body inválido: ${e.message}")
                 return@patch call.respond(HttpStatusCode.BadRequest, mapOf("error" to "body inválido"))
             }
+
+            call.application.environment.log.info("PATCH /usuarios/$email recibida, is_admin=${body.isAdmin}")
+
             val updated = userRepo.updateAdminByEmail(email, body.isAdmin)
             if (updated != null) {
                 call.respond(HttpStatusCode.OK, updated)
             } else {
+                call.application.environment.log.info("PATCH /usuarios/$email -> usuario no encontrado")
                 call.respond(HttpStatusCode.NotFound, mapOf("error" to "usuario no encontrado"))
             }
         }
